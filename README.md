@@ -3,7 +3,7 @@ Simple iOS Application for showing current time, location, speed and device orie
 
 This is an attempt to learn Swift programming and interaction with the Map and Device APIs. I don't mind admitting that ChatGPT helped me with the code!
 
-![IMG_9447](https://github.com/user-attachments/assets/d4b36b59-2a1b-4d77-aa14-b70ace16d506)
+<img src="https://github.com/user-attachments/assets/d4b36b59-2a1b-4d77-aa14-b70ace16d506" width="300">
 
 ## My own notes
 
