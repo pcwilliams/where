@@ -1,7 +1,7 @@
 # where
-Simple iOS Application for showing current time, location, speed and device orientation
+A simple iOS Application for showing current time, location, speed and device orientation.
 
-This is an attempt to learn Swift programming and interaction with the `SwiftUI`, `CoreLocation`, `CoreMotion` and `MapKit` APIs.
+This is an attempt for me to learn Swift programming and interaction with the `SwiftUI`, `CoreLocation`, `CoreMotion` and `MapKit` APIs.
 
 I don't mind admitting that ChatGPT helped me with the code!
 
