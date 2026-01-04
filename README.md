@@ -1,7 +1,9 @@
 # where
 Simple iOS Application for showing current time, location, speed and device orientation
 
-This is an attempt to learn Swift programming and interaction with the Map and Device APIs. I don't mind admitting that ChatGPT helped me with the code!
+This is an attempt to learn Swift programming and interaction with the `SwiftUI`, `CoreLocation`, `CoreMotion` and `MapKit` APIs.
+
+I don't mind admitting that ChatGPT helped me with the code!
 
 <img src="https://github.com/user-attachments/assets/d4b36b59-2a1b-4d77-aa14-b70ace16d506" width="300">
 
