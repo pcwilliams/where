@@ -55,7 +55,7 @@ struct ContentView: View {
                 row("Speed (km/h)", String(format: "%.1f", speedKPH))
                 row("Speed (mph)", String(format: "%.1f", speedMPH))
 
-                row("Heading", String(format: "%.0f°", locationManager.heading))
+                row("Heading", String(format: "%.0f° %@", locationManager.heading, compassDirection(locationManager.heading)))
                 row("Accuracy", String(format: "%.1f m", locationManager.accuracy))
             }
             .font(.system(.body, design: .monospaced))
@@ -76,21 +76,50 @@ struct ContentView: View {
             
             let currentStyle = MapStyleOption(rawValue: selectedStyleRaw)?.mapStyle ?? .standard
             
-            Map(position: $locationManager.mapCameraPosition) {
-                UserAnnotation()
-            }
-            .mapStyle(currentStyle)
-            .mapControls {
-                MapUserLocationButton()
+            ZStack(alignment: .topTrailing) {
+                Map(position: $locationManager.mapCameraPosition) {
+                    UserAnnotation()
+                }
+                .mapStyle(currentStyle)
+                .mapControls { }
+                .onMapCameraChange(frequency: .onEnd) { context in
+                    locationManager.handleCameraChange(
+                        center: context.camera.centerCoordinate,
+                        distance: context.camera.distance,
+                        region: context.region
+                    )
+                }
+
+                if !locationManager.isFollowingUser {
+                    Button {
+                        locationManager.recenter()
+                    } label: {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(.blue, in: Circle())
+                            .shadow(radius: 2)
+                    }
+                    .padding(12)
+                    .transition(.scale.combined(with: .opacity))
+                }
             }
             .frame(height: 300)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal)
+            .animation(.easeInOut(duration: 0.2), value: locationManager.isFollowingUser)
+
+            // MARK: - Map Scale
+            let km = locationManager.visibleHorizontalKm
+            let mi = km * 0.621371
+            Text(km >= 1
+                 ? String(format: "Visible: %.1f km / %.1f mi", km, mi)
+                 : String(format: "Visible: %.0f m / %.0f ft", km * 1000, km * 3280.84))
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
 
             // MARK: - Orientation Gauges
-            Text("Device Orientation")
-                .font(.headline)
-
             HStack {
                 orientationGauge("Yaw", value: locationManager.yaw, range: -180...180)
                 orientationGauge("Pitch", value: locationManager.pitch, range: -90...90)
@@ -107,6 +136,14 @@ struct ContentView: View {
             Text(label).frame(maxWidth: .infinity, alignment: .trailing)
             Text(value).frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    // MARK: - Compass Direction
+    private func compassDirection(_ degrees: Double) -> String {
+        let directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                          "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+        let index = Int((degrees + 11.25).truncatingRemainder(dividingBy: 360) / 22.5)
+        return directions[index]
     }
 
     // MARK: - Orientation Gauge

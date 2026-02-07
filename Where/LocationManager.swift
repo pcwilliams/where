@@ -14,6 +14,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var accuracy: Double = 0.0
     @Published var heading: Double = 0.0
     @Published var mapCameraPosition: MapCameraPosition = .automatic
+    @Published var isFollowingUser = true
+    @Published var visibleHorizontalKm: Double = 0
+    var cameraDistance: Double = 500
+    private var lastCenteredCoordinate: CLLocationCoordinate2D?
 
     @Published var yaw: Double = 0.0
     @Published var pitch: Double = 0.0
@@ -71,8 +75,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         speed = loc.speed >= 0 ? loc.speed : 0
         accuracy = loc.horizontalAccuracy
 
-        let camera = MapCamera(centerCoordinate: loc.coordinate, distance: 500)
-        mapCameraPosition = .camera(camera)
+        if isFollowingUser {
+            lastCenteredCoordinate = loc.coordinate
+            mapCameraPosition = .camera(MapCamera(centerCoordinate: loc.coordinate, distance: cameraDistance))
+        }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
@@ -80,5 +86,29 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         if Int(heading) != newWholeHeading {
             heading = Double(newWholeHeading)
         }
+    }
+
+    func handleCameraChange(center: CLLocationCoordinate2D, distance: Double, region: MKCoordinateRegion) {
+        cameraDistance = distance
+
+        let metersPerDegree = 111_320.0
+        let horizontalMeters = region.span.longitudeDelta * metersPerDegree * cos(region.center.latitude * .pi / 180)
+        visibleHorizontalKm = horizontalMeters / 1000
+
+        guard isFollowingUser, let lastCenter = lastCenteredCoordinate else { return }
+
+        let lastLoc = CLLocation(latitude: lastCenter.latitude, longitude: lastCenter.longitude)
+        let camLoc = CLLocation(latitude: center.latitude, longitude: center.longitude)
+
+        if lastLoc.distance(from: camLoc) > max(distance * 0.05, 5) {
+            isFollowingUser = false
+        }
+    }
+
+    func recenter() {
+        isFollowingUser = true
+        let coord = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        lastCenteredCoordinate = coord
+        mapCameraPosition = .camera(MapCamera(centerCoordinate: coord, distance: cameraDistance))
     }
 }
