@@ -16,7 +16,7 @@ Where displays your GPS coordinates, altitude, speed, compass heading, an intera
 
 ## Screenshots
 
-_Coming soon_
+![E1427BDC-4826-4734-B0D6-56F5167BAB19](https://github.com/user-attachments/assets/fc017c50-aeab-413e-ab2f-b966ef4df5cc)
 
 ## Requirements
 
